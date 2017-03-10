@@ -4,6 +4,7 @@
   ],
   plugins: [
     "static-fs",
-    "version-inline"
-  ]
+    "version-inline",
+  	"transform-es2015-modules-umd"
+	]
 }

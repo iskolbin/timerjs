@@ -1,3 +1,12 @@
+class Timer {
+	constructor( callback, delay, args, interval ) {
+		this.callback = callback
+		this.delay = delay
+		this.args = args
+		this.interval = interval
+	}
+}
+
 export default class TimerPool {
 	constructor( clock = 0.0 ) {
 		this.clock = clock
@@ -6,24 +15,31 @@ export default class TimerPool {
 		this.indices = new Map()
 	}
 
-	dcall( delay, f, ...args ) {
-		return this._enqueueTimer( [f, delay, args], this.clock + delay ) 
+	setTimeout( f, delay, ...args ) {
+		return this._enqueueTimer( new Timer( f, delay, args, false ))
 	}
 
-	remove( timer ) {
-		return this._removeTimer( timer )	
+	setInterval( f, delay, ...args ) {
+		return this._enqueueTimer( new Timer( f, delay, args, true ))
+	}
+
+	clearTimeout( timer ) {
+		return this._removeTimer( timer )
+	}
+
+	clearInterval( timer ) {
+		return this._removeTimer( timer )
 	}
 
 	update( clock ) {
 		this.clock = clock
-		const nextclock = this.priorities[0]
-		while ( nextclock !== undefined && nextclock <= clock ) {
-			const [f,delay,args] = this._dequeueTimer( self )
-			const newArgs = f.call( this, args )
-			if ( newArgs !== undefined ) {
-				this._enqueueTimer( [f, delay, newArgs], nextclock + delay )
+		while ( this.size > 0 && this.priorities[0] <= clock ) {
+			const timer = this._dequeueTimer()
+			const {f,delay,args,interval} = timer
+			f.apply( this, args )
+			if ( interval ) {
+				this._enqueueTimer( timer, this.priorities[0] + delay )
 			}
-			nextclock = this.priorities[0]
 		}
 	}
 
@@ -40,9 +56,11 @@ export default class TimerPool {
 	}
 
 	_enqueueTimer( timer, clock ) {
+		const index = this.size
 		this.timers.push( timer )
 		this.priorities.push( clock )
-		this.indices.set( timer, this.size )
+		this.indices.set( timer, index )
+		this._siftUp( index )
 		return timer
 	}
 
@@ -88,7 +106,7 @@ export default class TimerPool {
 	_siftUp( from ) {
 		let index = from
 		let parentIndex = index >> 1
-		while (index > 0 and priorities[parentIndex] > priorities[index]) {
+		while (index > 0 && priorities[parentIndex] > priorities[index]) {
 			this._swap( index, parentIndex )
 			index = parentIndex
 			parentIndex = parentIndex >> 1
@@ -98,6 +116,7 @@ export default class TimerPool {
 
 	_siftDown( limit ) {
 		const size = this.size
+		const priorities = this.priorities
 		for ( let index = limit-1; index >= 0; i-- ) {
 			let leftIndex = index + index
 			let rightIndex = leftIndex + 1
