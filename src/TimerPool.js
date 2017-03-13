@@ -56,46 +56,46 @@ export default class TimerPool {
 	}
 }
 
-const enqueueTimer = ( this, timer, clock ) => {
-	const index = this.size
-	this.timers.push( timer )
-	this.priorities.push( clock )
-	this.indices.set( timer, index )
-	siftUp( this, index )
+const enqueueTimer = ( self, timer, clock ) => {
+	const index = self.size
+	self.timers.push( timer )
+	self.priorities.push( clock )
+	self.indices.set( timer, index )
+	siftUp( self, index )
 	return timer
 }
 
-const dequeueTimer = ( this ) => {
-	const timer = this.timers[0]
-	this.indices.delete( timer )
-	if ( this.size > 1 ) {
-		this.timers[0] = timers.pop()
-		this.priorities[0] = priorities.pop()
-		this.indices.set( timers[0], 0 )
-		siftDown( this, 0 )
+const dequeueTimer = ( self ) => {
+	const timer = self.timers[0]
+	self.indices.delete( timer )
+	if ( self.size > 1 ) {
+		self.timers[0] = timers.pop()
+		self.priorities[0] = priorities.pop()
+		self.indices.set( timers[0], 0 )
+		siftDown( self, 0 )
 	} else {
-		this.timers.pop()
-		this.priorities.pop()
+		self.timers.pop()
+		self.priorities.pop()
 	}
 	return timer
 }
 
-const removeTimer = ( this, timer ) => {
-	const index = this.indices.get( timer )
+const removeTimer = ( self, timer ) => {
+	const index = self.indices.get( timer )
 	if ( index !== undefined ) {
-		const timers = this.timers
-		const priorities = this.priorities
-		const indices = this.indices
+		const timers = self.timers
+		const priorities = self.priorities
+		const indices = self.indices
 		indices.delete( timer )
-		if ( index == this.size-1 ) {
+		if ( index == self.size-1 ) {
 			timers.pop()
 			priorities.pop()
 		} else {
 			timers[index] = timers.pop()
 			priorities[index] = priorities.pop()
 			indices.set( timers[index], index )
-			if ( this.size > 1 ) {
-				siftDown( this, siftUp( this, index ))
+			if ( self.size > 1 ) {
+				siftDown( self, siftUp( self, index ))
 			}
 		}
 		return true
@@ -104,20 +104,20 @@ const removeTimer = ( this, timer ) => {
 	}
 }
 
-const siftUp = ( this, from ) => {
+const siftUp = ( self, from ) => {
 	let index = from
 	let parentIndex = index >> 1
 	while (index > 0 && priorities[parentIndex] > priorities[index]) {
-		swap( this, index, parentIndex )
+		swap( self, index, parentIndex )
 		index = parentIndex
 		parentIndex = parentIndex >> 1
 	}
 	return index
 }
 
-const siftDown = ( this, limit ) => {
-	const size = this.size
-	const priorities = this.priorities
+const siftDown = ( self, limit ) => {
+	const size = self.size
+	const priorities = self.priorities
 	for ( let index = limit-1; index >= 0; i-- ) {
 		let leftIndex = index + index
 		let rightIndex = leftIndex + 1
@@ -127,7 +127,7 @@ const siftDown = ( this, limit ) => {
 				smaller = rightIndex
 			}
 			if ( priorities[index] > priorities[smaller] ) {
-				swap( this, index, smaller )
+				swap( self, index, smaller )
 			} else {
 				break
 			}
@@ -138,13 +138,13 @@ const siftDown = ( this, limit ) => {
 	}
 }
 
-const swap( this, i, j ) => {
-	const tempTimer = this.timers[i]
-	const tempPriority = this.priorities[i]
-	this.timers[i] = this.timers[j]
-	this.priorities[i] = this.priorities[j]
-	this.indices.set( this.timers[i], i )
-	this.timers[j] = tempTimer
-	this.priorities[j] = tempPriority
-	this.indices.set( tempTimer, j )
+const swap = ( self, i, j ) => {
+	const tempTimer = self.timers[i]
+	const tempPriority = self.priorities[i]
+	self.timers[i] = self.timers[j]
+	self.priorities[i] = self.priorities[j]
+	self.indices.set( self.timers[i], i )
+	self.timers[j] = tempTimer
+	self.priorities[j] = tempPriority
+	self.indices.set( tempTimer, j )
 }
