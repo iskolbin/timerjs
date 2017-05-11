@@ -118,7 +118,7 @@ const siftUp = ( self, from ) => {
 const siftDown = ( self, limit ) => {
 	const size = self.size
 	const priorities = self.priorities
-	for ( let index = limit-1; index >= 0; i-- ) {
+	for ( let index = limit-1; index >= 0; index-- ) {
 		let leftIndex = index + index
 		let rightIndex = leftIndex + 1
 		while (leftIndex < size) {
